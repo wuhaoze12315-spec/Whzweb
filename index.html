@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>💖 我们的时光 · 爱意相册</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(145deg, #fef5f0 0%, #ffe8e0 100%);
+            font-family: 'Segoe UI', 'Quicksand', system-ui, -apple-system, 'Helvetica Neue', sans-serif;
+            padding: 2rem 1rem;
+            color: #5a3e35;
+        }
+
+        /* 主容器 */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* 头部温馨文字 */
+        .hero {
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: fadeInDown 0.8s ease;
+        }
+
+        .hero h1 {
+            font-size: 2.8rem;
+            background: linear-gradient(135deg, #e48c7c, #d96c5a);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            letter-spacing: -0.5px;
+            margin-bottom: 0.5rem;
+            display: inline-block;
+        }
+
+        .hero .sub {
+            font-size: 1.2rem;
+            color: #b28b7a;
+            border-top: 2px solid #ffe0d4;
+            display: inline-block;
+            padding-top: 0.8rem;
+            margin-top: 0.5rem;
+        }
+
+        /* 心形装饰 */
+        .heart-dec {
+            font-size: 1.8rem;
+            margin: 1rem 0;
+            opacity: 0.7;
+        }
+
+        /* 相册网格 */
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        /* 卡片 */
+        .card {
+            background: rgba(255, 248, 245, 0.9);
+            backdrop-filter: blur(2px);
+            border-radius: 32px;
+            overflow: hidden;
+            box-shadow: 0 20px 30px -12px rgba(0, 0, 0, 0.1), 0 4px 12px rgba(0, 0, 0, 0.05);
+            transition: all 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            cursor: pointer;
+            border: 1px solid #ffede3;
+        }
+
+        .card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 28px 34px -14px rgba(0, 0, 0, 0.2);
+            background: white;
+        }
+
+        .card-img {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+            display: block;
+        }
+
+        .card:hover .card-img {
+            transform: scale(1.02);
+        }
+
+        .card-info {
+            padding: 1rem 1.2rem 1.4rem;
+            text-align: center;
+        }
+
+        .card-info h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #c26a58;
+            margin-bottom: 0.3rem;
+        }
+
+        .card-info p {
+            font-size: 0.85rem;
+            color: #b69b8e;
+            letter-spacing: 0.3px;
+        }
+
+        /* 轻提示 & 加载 */
+        .loading-message {
+            text-align: center;
+            padding: 3rem;
+            font-size: 1.2rem;
+            color: #cc9e8c;
+        }
+
+        .footer-note {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 1.5rem;
+            border-top: 2px dashed #ffd9cc;
+            font-size: 0.9rem;
+            color: #cfa392;
+        }
+
+        /* 模态框（点击大图） */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            cursor: pointer;
+        }
+
+        .modal-img {
+            max-width: 90vw;
+            max-height: 85vh;
+            border-radius: 32px;
+            box-shadow: 0 30px 40px rgba(0,0,0,0.3);
+            border: 5px solid #fff8f0;
+            object-fit: contain;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 25px;
+            right: 35px;
+            font-size: 2.5rem;
+            color: white;
+            cursor: pointer;
+            background: rgba(0,0,0,0.5);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+        }
+        .modal-close:hover {
+            background: #e48c7c;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 680px) {
+            .hero h1 { font-size: 2rem; }
+            .gallery { gap: 1.2rem; }
+            .card-info h3 { font-size: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="hero">
+        <div class="heart-dec">❤️‍🔥  ✨  💖</div>
+        <h1>她的小世界</h1>
+        <div class="sub">每一次快门，都是一句 “我爱你”</div>
+    </div>
+
+    <!-- 相册网格 -->
+    <div class="gallery" id="gallery">
+        <div class="loading-message">💗 正在加载温柔瞬间 …</div>
+    </div>
+
+    <div class="footer-note">
+        🌸 点击任意照片放大欣赏 · 每张照片都是收藏的星辰 🌸
+    </div>
+</div>
+
+<!-- 大图模态框 -->
+<div id="imageModal" class="modal">
+    <span class="modal-close">&times;</span>
+    <img class="modal-img" id="modalImg" src="" alt="放大的照片">
+</div>
+
+<script>
+    // ========================
+    // 在这里配置你的照片列表
+    // ========================
+    // 方法1：手动列出每张照片的文件名和标题
+    // 推荐你把照片放到 images/ 文件夹下，按下面格式填写即可
+    
+    const photoList = [
+        { src: "images/1.jpg", title: "初见·心动", desc: "那年春天，微笑像花" },
+        { src: "images/2.jpg", title: "温柔日常", desc: "喝奶茶的样子也甜甜的" },
+        { src: "images/3.jpg", title: "日落拥抱", desc: "黄昏与你是最暖的滤镜" },
+        { src: "images/4.jpg", title: "可爱暴击", desc: "眨眼犯规啦~" },
+        { src: "images/5.jpg", title: "默契对视", desc: "不用说话，就很好" },
+        { src: "images/6.jpg", title: "小小旅行", desc: "脚印成双" }
+        // 🧡 如果你有很多照片，继续按照这个格式往下加即可，记得文件名要和 images 文件夹里的一致
+        // 比如再加一张: { src: "images/7.jpg", title: "冬日暖阳", desc: "围巾上都是你的香气" },
+    ];
+
+    // 如果你不想手动写那么多标题，也可以用自动生成函数，只需提供照片文件名数组
+    // 示例自动生成 (需要确保 images/ 下是 1.jpg, 2.jpg... )
+    // 下面的代码会帮你自动生成从1到最大编号的照片，并且标题统一用“珍藏瞬间 X”
+    // 你只需修改 totalPhotosNumber 和 照片实际存在的最大编号即可。
+    
+    // ----- 智能方式(推荐)：自动扫描数量 (免手动写列表) -----
+    // 如果你想自动适配，就把下面的 autoGenerate 设为 true，并设置 MAX_PHOTO_NUM
+    const AUTO_GENERATE = true;       // 改为false就使用上面的手动列表
+    const MAX_PHOTO_NUM = 20;         // 你的照片最大编号（例如 images 下有1.jpg ~ 20.jpg，就写20）
+    
+    function buildPhotoList() {
+        if (!AUTO_GENERATE) return photoList;
+        
+        const list = [];
+        for (let i = 1; i <= MAX_PHOTO_NUM; i++) {
+            // 照片路径格式：images/1.jpg, images/2.jpg, ......
+            list.push({
+                src: `images/${i}.jpg`,
+                title: `💌 珍藏 · ${i}`,
+                desc: i % 2 === 0 ? '眼底尽是温柔' : '心动的证据'
+            });
+        }
+        return list;
+    }
+    
+    // 最终使用的照片列表
+    const finalPhotos = buildPhotoList();
+
+    // 渲染相册
+    function renderGallery() {
+        const galleryDiv = document.getElementById('gallery');
+        if (!finalPhotos.length) {
+            galleryDiv.innerHTML = '<div class="loading-message">🌸 还没有照片哦~ 请把照片放进 images 文件夹并命名 1.jpg,2.jpg 等 🌸</div>';
+            return;
+        }
+        
+        let html = '';
+        for (let i = 0; i < finalPhotos.length; i++) {
+            const p = finalPhotos[i];
+            html += `
+                <div class="card" data-index="${i}">
+                    <img class="card-img" src="${p.src}" alt="${p.title}" loading="lazy" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Crect%20width%3D%22100%22%20height%3D%22100%22%20fill%3D%22%23ffe0d4%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20text-anchor%3D%22middle%22%20dy%3D%22.3em%22%20fill%3D%22%23b28b7a%22%3E❤️%20缺失%3C%2Ftext%3E%3C%2Fsvg%3E';">
+                    <div class="card-info">
+                        <h3>${escapeHtml(p.title)}</h3>
+                        <p>${escapeHtml(p.desc)}</p>
+                    </div>
+                </div>
+            `;
+        }
+        galleryDiv.innerHTML = html;
+        
+        // 绑定卡片点击事件（打开大图）
+        const cards = document.querySelectorAll('.card');
+        cards.forEach(card => {
+            card.addEventListener('click', (e) => {
+                const idx = card.getAttribute('data-index');
+                const photo = finalPhotos[idx];
+                if (photo && photo.src) {
+                    openModal(photo.src);
+                }
+            });
+        });
+    }
+    
+    // 简单的防XSS
+    function escapeHtml(str) {
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
+            return c;
+        });
+    }
+    
+    // 模态框逻辑
+    const modal = document.getElementById('imageModal');
+    const modalImg = document.getElementById('modalImg');
+    const closeModalBtn = document.querySelector('.modal-close');
+    
+    function openModal(imgSrc) {
+        modal.style.display = 'flex';
+        modalImg.src = imgSrc;
+    }
+    
+    function closeModal() {
+        modal.style.display = 'none';
+        modalImg.src = '';
+    }
+    
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+    closeModalBtn.addEventListener('click', closeModal);
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.style.display === 'flex') closeModal();
+    });
+    
+    // 启动
+    renderGallery();
+</script>
+</body>
+</html>
