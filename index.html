@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>🎂 生日快乐 · 专属相册</title>
+    <title>🎂 生日快乐 · 专属情话相册</title>
     <style>
         * {
             margin: 0;
@@ -23,7 +23,6 @@
             margin: 0 auto;
         }
 
-        /* 头部生日主题 */
         .hero {
             text-align: center;
             margin-bottom: 3rem;
@@ -99,6 +98,7 @@
         .card-info p {
             font-size: 0.85rem;
             color: #c99a7a;
+            font-style: italic;
         }
 
         .footer-note {
@@ -175,7 +175,7 @@
     <div class="hero">
         <div class="cake-icon">🎂🎈✨</div>
         <h1>生日快乐，亲爱的</h1>
-        <div class="sub">每一天都因为你而特别 · 今天尤其如此</div>
+        <div class="sub">每张照片都藏着一句悄悄话 · 只给你听</div>
     </div>
 
     <div class="gallery" id="gallery">
@@ -183,7 +183,7 @@
     </div>
 
     <div class="footer-note">
-        💖 点击照片放大 · 祝你生日快乐，永远被爱包围 💖
+        💖 点击照片放大 · 生日快乐，永远被爱包围 💖
     </div>
 </div>
 
@@ -194,20 +194,47 @@
 
 <script>
     // ============================================
-    // ✨ 重要：请根据你实际上传的照片数量，修改下面的数字 ✨
-    // 你目前在 images/ 文件夹里放了6张照片（1.jpg ~ 6.jpg），所以设为6
-    // 以后每增加一张新照片，就把这个数字加1，重新上传 index.html 即可
+    // ✨ 照片数量设置（改成你实际的照片张数）
     // ============================================
-    const TOTAL_PHOTOS = 6;   // <--- 改成你实际的照片张数
+    const TOTAL_PHOTOS = 6;   // <--- 你当前有6张照片，请保持6；以后增加照片时改这个数字
 
-    // 自动生成照片列表（不会有多余的空槽位）
+    // ============================================
+    // 💌 专属情话库（每张照片自动分配不同的一句话）
+    // 你可以随意增删或修改下面的句子，数量不限
+    // ============================================
+    const LOVE_PHRASES = [
+        "✨ 遇见你，是我此生最好的运气",
+        "🌸 你的笑容，比蛋糕还甜",
+        "🎈 和你在一起的每一天，都值得庆祝",
+        "💖 你是我写不完的温柔",
+        "🌙 星星是银河递给月亮的情书，你是世界赠予我的恩赐",
+        "🍰 许个愿吧，我的愿望全都是你",
+        "💕 你是我的今天，以及所有的明天",
+        "🎂 又长大一岁，但我依然想把你宠成小朋友",
+        "🌷 世界很大，幸福很小，有你就好",
+        "❤️ 不管几岁，快乐万岁",
+        "🎀 你是宇宙里最明亮的那颗糖",
+        "🕯️ 每支蜡烛都代表一个我爱你",
+        "✨ 你的名字，是我读过最短的情诗",
+        "🥰 你像夏天的风，温柔了整个季节",
+        "💐 你配得上世间所有美好，包括我"
+    ];
+
+    // 根据照片索引获取对应的情话（确保不同，但照片多于情话数量时会循环）
+    function getLovePhrase(index) {
+        // index 从 0 开始
+        return LOVE_PHRASES[index % LOVE_PHRASES.length];
+    }
+
+    // 自动生成照片列表（每张照片都有不同的标题和情话）
     function buildPhotoList() {
         const list = [];
         for (let i = 1; i <= TOTAL_PHOTOS; i++) {
+            const phrase = getLovePhrase(i - 1);
             list.push({
                 src: `images/${i}.jpg`,
-                title: `🎂 生日快乐 · 定格第 ${i} 刻`,
-                desc: i % 2 === 0 ? '你的笑容像蜜糖' : '又甜又温暖的瞬间'
+                title: `🎂 生日快乐 · 第${i}枚时光`,
+                desc: phrase
             });
         }
         return list;
