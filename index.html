@@ -53,6 +53,33 @@
             margin: 1rem 0;
         }
 
+        /* 音乐控制按钮 - 固定在右下角 */
+        .music-control {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            width: 55px;
+            height: 55px;
+            background-color: #ffccaa;
+            border-radius: 50%;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 999;
+            transition: all 0.3s ease;
+            border: 2px solid #fff5e8;
+        }
+        .music-control:hover {
+            transform: scale(1.1);
+            background-color: #ffb88c;
+        }
+        .music-control span {
+            font-size: 28px;
+            user-select: none;
+        }
+
         .gallery {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -166,6 +193,8 @@
         @media (max-width: 680px) {
             .hero h1 { font-size: 2.2rem; }
             .gallery { gap: 1.2rem; }
+            .music-control { width: 45px; height: 45px; bottom: 15px; right: 15px; }
+            .music-control span { font-size: 24px; }
         }
     </style>
 </head>
@@ -187,6 +216,16 @@
     </div>
 </div>
 
+<!-- 音乐控制按钮 -->
+<div id="musicBtn" class="music-control">
+    <span>🎵</span>
+</div>
+<audio id="bgMusic" loop preload="auto">
+    <source src="birthday.mp3" type="audio/mpeg">
+    你的浏览器不支持音频播放。
+</audio>
+
+<!-- 放大照片模态框 -->
 <div id="imageModal" class="modal">
     <span class="modal-close">&times;</span>
     <img class="modal-img" id="modalImg" src="" alt="生日快乐">
@@ -220,13 +259,12 @@
         "💐 你配得上世间所有美好，包括我"
     ];
 
-    // 根据照片索引获取对应的情话（确保不同，但照片多于情话数量时会循环）
+    // 根据照片索引获取不同的情话
     function getLovePhrase(index) {
-        // index 从 0 开始
         return LOVE_PHRASES[index % LOVE_PHRASES.length];
     }
 
-    // 自动生成照片列表（每张照片都有不同的标题和情话）
+    // 自动生成照片列表
     function buildPhotoList() {
         const list = [];
         for (let i = 1; i <= TOTAL_PHOTOS; i++) {
@@ -304,6 +342,43 @@
         if (e.key === 'Escape' && modal.style.display === 'flex') closeModal();
     });
 
+    // ========================
+    // 音乐控制逻辑
+    // ========================
+    const musicBtn = document.getElementById('musicBtn');
+    const bgMusic = document.getElementById('bgMusic');
+    let isPlaying = false;
+
+    // 尝试自动播放会被浏览器阻止，所以改为用户点击按钮才开始播放
+    function toggleMusic() {
+        if (isPlaying) {
+            bgMusic.pause();
+            musicBtn.innerHTML = '<span>🔇</span>';
+            isPlaying = false;
+        } else {
+            bgMusic.play().then(() => {
+                musicBtn.innerHTML = '<span>🎵</span>';
+                isPlaying = true;
+            }).catch(err => {
+                console.log("播放失败，可能需要用户交互:", err);
+                // 如果因为缺少用户交互失败，按钮依然保持静音状态，再次点击会重试
+                musicBtn.innerHTML = '<span>🔇</span>';
+                isPlaying = false;
+                alert("请再次点击音乐按钮，浏览器需要您的允许才能自动播放音乐。");
+            });
+        }
+    }
+
+    musicBtn.addEventListener('click', toggleMusic);
+
+    // 可选：当音频播放结束时自动循环（loop已设置，但保险）
+    bgMusic.addEventListener('ended', function() {
+        if (isPlaying) {
+            bgMusic.play().catch(e => console.log("循环播放失败", e));
+        }
+    });
+
+    // 初始化页面
     renderGallery();
 </script>
 </body>
