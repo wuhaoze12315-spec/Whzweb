@@ -3,7 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>🎂 生日快乐 · 专属情话相册</title>
+    <title>🎂 生日快乐 · 挚爱珍藏</title>
+    <!-- Google Fonts 手写字体 -->
+    <link href="https://fonts.googleapis.com/css2?family=Kalam:wght@300;400;700&display=swap" rel="stylesheet">
+    <!-- canvas-confetti 库（用于烟花效果） -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1"></script>
     <style>
         * {
             margin: 0;
@@ -16,13 +20,37 @@
             font-family: 'Segoe UI', 'Quicksand', system-ui, -apple-system, 'Helvetica Neue', sans-serif;
             padding: 2rem 1rem;
             color: #b45a3b;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* 背景流动光晕 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 30% 40%, rgba(255,220,190,0.4) 0%, rgba(255,240,220,0) 70%);
+            pointer-events: none;
+            z-index: -1;
+            animation: slowMove 20s infinite alternate;
+        }
+
+        @keyframes slowMove {
+            0% { transform: scale(1) translate(0, 0); }
+            100% { transform: scale(1.2) translate(2%, 3%); }
         }
 
         .container {
             max-width: 1200px;
             margin: 0 auto;
+            position: relative;
+            z-index: 2;
         }
 
+        /* 头部区域 */
         .hero {
             text-align: center;
             margin-bottom: 3rem;
@@ -37,6 +65,7 @@
             color: transparent;
             letter-spacing: -0.5px;
             margin-bottom: 0.5rem;
+            font-family: 'Kalam', cursive;
         }
 
         .hero .sub {
@@ -53,33 +82,50 @@
             margin: 1rem 0;
         }
 
-        /* 音乐控制按钮 - 固定在右下角 */
-        .music-control {
-            position: fixed;
-            bottom: 25px;
-            right: 25px;
-            width: 55px;
-            height: 55px;
-            background-color: #ffccaa;
-            border-radius: 50%;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            z-index: 999;
-            transition: all 0.3s ease;
-            border: 2px solid #fff5e8;
-        }
-        .music-control:hover {
-            transform: scale(1.1);
-            background-color: #ffb88c;
-        }
-        .music-control span {
-            font-size: 28px;
-            user-select: none;
+        /* 倒计时样式 */
+        .countdown {
+            margin-top: 20px;
+            font-size: 1rem;
+            background: rgba(255, 240, 230, 0.9);
+            display: inline-block;
+            padding: 8px 18px;
+            border-radius: 40px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            font-weight: 500;
         }
 
+        /* 时间轴 */
+        .timeline {
+            max-width: 600px;
+            margin: 40px auto;
+            background: rgba(255,245,235,0.8);
+            border-radius: 48px;
+            padding: 20px 25px;
+            text-align: center;
+            backdrop-filter: blur(2px);
+        }
+        .timeline h3 {
+            font-size: 1.4rem;
+            color: #e07a4f;
+            margin-bottom: 15px;
+            font-family: 'Kalam', cursive;
+        }
+        .milestone {
+            margin: 12px 0;
+            font-size: 1rem;
+            border-left: 3px solid #ffaa88;
+            padding-left: 20px;
+            text-align: left;
+            background: rgba(255,255,245,0.5);
+            border-radius: 20px;
+            transition: 0.2s;
+        }
+        .milestone:hover {
+            background: #fff5ea;
+            transform: translateX(5px);
+        }
+
+        /* 相册网格 */
         .gallery {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -120,12 +166,18 @@
             font-weight: 600;
             color: #e07a4f;
             margin-bottom: 0.3rem;
+            font-family: 'Kalam', cursive;
         }
 
         .card-info p {
             font-size: 0.85rem;
             color: #c99a7a;
             font-style: italic;
+            transition: all 0.3s ease;
+        }
+        .card:hover .card-info p {
+            color: #ff8c5a;
+            letter-spacing: 0.5px;
         }
 
         .footer-note {
@@ -137,6 +189,7 @@
             color: #d9a17e;
         }
 
+        /* 模态框（大图） */
         .modal {
             display: none;
             position: fixed;
@@ -179,15 +232,71 @@
             background: #ff8c5a;
         }
 
+        /* 音乐控制按钮 */
+        .music-control {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            width: 55px;
+            height: 55px;
+            background-color: #ffccaa;
+            border-radius: 50%;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 999;
+            transition: all 0.3s ease;
+            border: 2px solid #fff5e8;
+        }
+        .music-control:hover {
+            transform: scale(1.1);
+            background-color: #ffb88c;
+        }
+        .music-control span {
+            font-size: 28px;
+            user-select: none;
+        }
+
+        /* 礼物盒遮罩层 */
+        #giftOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #fde8dd;
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            cursor: pointer;
+            transition: opacity 1s ease;
+            backdrop-filter: blur(2px);
+        }
+        .gift-box {
+            font-size: 80px;
+            animation: bounce 1.2s infinite ease;
+        }
+        .gift-text {
+            font-size: 26px;
+            margin-top: 20px;
+            background: #ffd9c4;
+            padding: 10px 24px;
+            border-radius: 60px;
+            color: #b45a3b;
+            font-weight: bold;
+        }
+        @keyframes bounce {
+            0%,100%{ transform: translateY(0); }
+            50%{ transform: translateY(-12px); }
+        }
+
         @keyframes fadeInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         @media (max-width: 680px) {
@@ -195,16 +304,33 @@
             .gallery { gap: 1.2rem; }
             .music-control { width: 45px; height: 45px; bottom: 15px; right: 15px; }
             .music-control span { font-size: 24px; }
+            .gift-text { font-size: 20px; }
         }
     </style>
 </head>
 <body>
 
-<div class="container">
+<!-- 礼物盒开场遮罩 -->
+<div id="giftOverlay">
+    <div class="gift-box">🎁</div>
+    <div class="gift-text">点击打开生日礼物 💝</div>
+</div>
+
+<div class="container" id="mainContent" style="display: none;">
     <div class="hero">
         <div class="cake-icon">🎂🎈✨</div>
         <h1>生日快乐，亲爱的</h1>
         <div class="sub">每张照片都藏着一句悄悄话 · 只给你听</div>
+        <div class="countdown" id="countdownBox">🎂 距离生日还有 -- 天 🎈</div>
+    </div>
+
+    <!-- 时间轴 -->
+    <div class="timeline">
+        <h3>✨ 我们的时光轴 ✨</h3>
+        <div class="milestone">💑 第一次见面 · 2023.5.20</div>
+        <div class="milestone">🎂 她的生日 · 每年最特别的一天</div>
+        <div class="milestone">✈️ 第一次旅行 · 厦门 · 2024.3.12</div>
+        <div class="milestone">📸 收集的第100张合影 · 未完待续</div>
     </div>
 
     <div class="gallery" id="gallery">
@@ -216,8 +342,8 @@
     </div>
 </div>
 
-<!-- 音乐控制按钮 -->
-<div id="musicBtn" class="music-control">
+<!-- 音乐控制按钮（一开始隐藏，等礼物盒打开后显示） -->
+<div id="musicBtn" class="music-control" style="display: none;">
     <span>🎵</span>
 </div>
 <audio id="bgMusic" loop preload="auto">
@@ -225,7 +351,7 @@
     你的浏览器不支持音频播放。
 </audio>
 
-<!-- 放大照片模态框 -->
+<!-- 大图模态框 -->
 <div id="imageModal" class="modal">
     <span class="modal-close">&times;</span>
     <img class="modal-img" id="modalImg" src="" alt="生日快乐">
@@ -233,14 +359,14 @@
 
 <script>
     // ============================================
-    // ✨ 照片数量设置（改成你实际的照片张数）
+    // 用户配置区
     // ============================================
-    const TOTAL_PHOTOS = 6;   // <--- 你当前有6张照片，请保持6；以后增加照片时改这个数字
-
-    // ============================================
-    // 💌 专属情话库（每张照片自动分配不同的一句话）
-    // 你可以随意增删或修改下面的句子，数量不限
-    // ============================================
+    const TOTAL_PHOTOS = 6;               // 你的照片数量 (1.jpg ~ 6.jpg)
+    const HER_BIRTHDAY = { month: 5, day: 15 };  // 女朋友的生日（月, 日），例如5月15日，月份用0~11，这里5表示6月？注意：实际月份是从0开始的，但为了方便，写法采用实际数字再转换。
+    // 为了方便：直接写 "YYYY-MM-DD" 格式的生日，我们取每年的该日期
+    const BIRTHDAY_STR = "2026-06-15";    // 示例：6月15日，年份写今年或明年，程序会自动计算下一个生日
+    
+    // 情话库
     const LOVE_PHRASES = [
         "✨ 遇见你，是我此生最好的运气",
         "🌸 你的笑容，比蛋糕还甜",
@@ -258,13 +384,36 @@
         "🥰 你像夏天的风，温柔了整个季节",
         "💐 你配得上世间所有美好，包括我"
     ];
-
-    // 根据照片索引获取不同的情话
+    
+    // 辅助：计算距离下一个生日的天数
+    function getDaysUntilBirthday() {
+        const today = new Date();
+        const birthDate = new Date(BIRTHDAY_STR);
+        let nextBirthday = new Date(today.getFullYear(), birthDate.getMonth(), birthDate.getDate());
+        if (today > nextBirthday) {
+            nextBirthday.setFullYear(today.getFullYear() + 1);
+        }
+        const diff = Math.ceil((nextBirthday - today) / (1000 * 60 * 60 * 24));
+        return diff;
+    }
+    
+    // 更新倒计时显示
+    function updateCountdown() {
+        const days = getDaysUntilBirthday();
+        const countdownDiv = document.getElementById('countdownBox');
+        if (countdownDiv) {
+            if (days === 0) countdownDiv.innerHTML = "🎂 就是今天！生日快乐！ 🎉🎂";
+            else if (days === 1) countdownDiv.innerHTML = "🎂 距离生日还有 1 天！ 💖";
+            else countdownDiv.innerHTML = `🎂 距离下一个生日还有 ${days} 天 🎈`;
+        }
+    }
+    
+    // 根据照片索引获取情话
     function getLovePhrase(index) {
         return LOVE_PHRASES[index % LOVE_PHRASES.length];
     }
-
-    // 自动生成照片列表
+    
+    // 生成照片列表
     function buildPhotoList() {
         const list = [];
         for (let i = 1; i <= TOTAL_PHOTOS; i++) {
@@ -277,23 +426,68 @@
         }
         return list;
     }
-
-    const photos = buildPhotoList();
-
+    
+    let photos = [];
+    let isMusicPlaying = false;
+    let musicAllowed = false;  // 是否允许播放（点击礼物盒后置true）
+    
+    // 飘落爱心/花瓣 - 在礼物盒打开后启动
+    let fallingInterval = null;
+    function startFallingHearts() {
+        if (fallingInterval) return;
+        const body = document.body;
+        const heartCount = 35;
+        for (let i = 0; i < heartCount; i++) {
+            let heart = document.createElement('div');
+            heart.innerHTML = '❤️';
+            heart.style.position = 'fixed';
+            heart.style.left = Math.random() * 100 + '%';
+            heart.style.top = '-20px';
+            heart.style.fontSize = (Math.random() * 20 + 12) + 'px';
+            heart.style.opacity = Math.random() * 0.6 + 0.2;
+            heart.style.pointerEvents = 'none';
+            heart.style.zIndex = 9999;
+            heart.style.animation = `fall ${Math.random() * 5 + 5}s linear infinite`;
+            heart.style.animationDelay = Math.random() * 10 + 's';
+            body.appendChild(heart);
+            
+            // 可选：自动清理以防过多，但可以保留
+            heart.addEventListener('animationend', () => { if(heart.parentNode) heart.remove(); });
+        }
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fall {
+                0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+                100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+            }
+        `;
+        if (!document.querySelector('#fallingStyle')) {
+            style.id = 'fallingStyle';
+            document.head.appendChild(style);
+        }
+    }
+    
+    // 烟花效果
+    function fireConfetti() {
+        canvasConfetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#ff88aa', '#ffaa66', '#ff6644'] });
+        setTimeout(() => canvasConfetti({ particleCount: 100, spread: 100, origin: { y: 0.5, x: 0.2 }, startVelocity: 15 }), 200);
+        setTimeout(() => canvasConfetti({ particleCount: 120, spread: 80, origin: { y: 0.7, x: 0.8 } }), 400);
+    }
+    
+    // 渲染相册
     function renderGallery() {
         const galleryDiv = document.getElementById('gallery');
-        if (photos.length === 0) {
-            galleryDiv.innerHTML = '<div class="loading-message">🌸 还没放照片呢，快把照片放进 images 文件夹吧 🌸</div>';
+        if (!photos.length) {
+            galleryDiv.innerHTML = '<div class="loading-message">🌸 还没放照片呢，请将照片放入 images 文件夹 (1.jpg,2.jpg...)</div>';
             return;
         }
-
         let html = '';
         for (let i = 0; i < photos.length; i++) {
             const p = photos[i];
             html += `
                 <div class="card" data-index="${i}">
                     <img class="card-img" src="${p.src}" alt="${p.title}" loading="lazy"
-                         onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Crect%20width%3D%22100%22%20height%3D%22100%22%20fill%3D%22%23ffe0c4%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20text-anchor%3D%22middle%22%20dy%3D%22.3em%22%20fill%3D%22%23b45a3b%22%3E🎂%20照片加载失败%3C%2Ftext%3E%3C%2Fsvg%3E';">
+                         onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Crect%20width%3D%22100%22%20height%3D%22100%22%20fill%3D%22%23ffe0c4%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20text-anchor%3D%22middle%22%20dy%3D%22.3em%22%20fill%3D%22%23b45a3b%22%3E🎂%20加载失败%3C%2Ftext%3E%3C%2Fsvg%3E';">
                     <div class="card-info">
                         <h3>${escapeHtml(p.title)}</h3>
                         <p>${escapeHtml(p.desc)}</p>
@@ -302,16 +496,19 @@
             `;
         }
         galleryDiv.innerHTML = html;
-
+        
         // 绑定点击放大事件
         document.querySelectorAll('.card').forEach(card => {
-            card.addEventListener('click', () => {
+            card.addEventListener('click', (e) => {
                 const idx = card.getAttribute('data-index');
-                if (photos[idx]) openModal(photos[idx].src);
+                if (photos[idx]) {
+                    openModal(photos[idx].src);
+                    fireConfetti();  // 点击照片时放烟花
+                }
             });
         });
     }
-
+    
     function escapeHtml(str) {
         return str.replace(/[&<>]/g, function(m) {
             if (m === '&') return '&amp;';
@@ -320,12 +517,11 @@
             return m;
         });
     }
-
+    
     // 模态框逻辑
     const modal = document.getElementById('imageModal');
     const modalImg = document.getElementById('modalImg');
     const closeModalBtn = document.querySelector('.modal-close');
-
     function openModal(src) {
         modal.style.display = 'flex';
         modalImg.src = src;
@@ -341,45 +537,64 @@
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && modal.style.display === 'flex') closeModal();
     });
-
-    // ========================
-    // 音乐控制逻辑
-    // ========================
+    
+    // 音乐控制
     const musicBtn = document.getElementById('musicBtn');
     const bgMusic = document.getElementById('bgMusic');
-    let isPlaying = false;
-
-    // 尝试自动播放会被浏览器阻止，所以改为用户点击按钮才开始播放
     function toggleMusic() {
-        if (isPlaying) {
+        if (!musicAllowed) return;
+        if (isMusicPlaying) {
             bgMusic.pause();
             musicBtn.innerHTML = '<span>🔇</span>';
-            isPlaying = false;
+            isMusicPlaying = false;
         } else {
             bgMusic.play().then(() => {
                 musicBtn.innerHTML = '<span>🎵</span>';
-                isPlaying = true;
+                isMusicPlaying = true;
             }).catch(err => {
-                console.log("播放失败，可能需要用户交互:", err);
-                // 如果因为缺少用户交互失败，按钮依然保持静音状态，再次点击会重试
-                musicBtn.innerHTML = '<span>🔇</span>';
-                isPlaying = false;
-                alert("请再次点击音乐按钮，浏览器需要您的允许才能自动播放音乐。");
+                console.log("播放失败", err);
+                alert("点击页面后再试一次～");
             });
         }
     }
-
     musicBtn.addEventListener('click', toggleMusic);
-
-    // 可选：当音频播放结束时自动循环（loop已设置，但保险）
-    bgMusic.addEventListener('ended', function() {
-        if (isPlaying) {
-            bgMusic.play().catch(e => console.log("循环播放失败", e));
-        }
-    });
-
-    // 初始化页面
-    renderGallery();
+    
+    // 开启整个网站（礼物盒点击后）
+    function openGiftAndStart() {
+        const overlay = document.getElementById('giftOverlay');
+        const main = document.getElementById('mainContent');
+        overlay.style.opacity = '0';
+        setTimeout(() => {
+            overlay.style.display = 'none';
+            main.style.display = 'block';
+            musicBtn.style.display = 'flex';
+            // 允许音乐播放
+            musicAllowed = true;
+            // 开始飘落爱心
+            startFallingHearts();
+            // 倒计时更新
+            updateCountdown();
+            // 可选自动播放音乐（受浏览器策略限制，需用户再次点击？因为刚刚点击了礼物盒，属于用户交互，可以尝试播放）
+            bgMusic.play().then(() => {
+                isMusicPlaying = true;
+                musicBtn.innerHTML = '<span>🎵</span>';
+            }).catch(() => {
+                // 如果播放失败，保留按钮手动
+                console.log("自动播放需手动");
+            });
+        }, 1000);
+    }
+    
+    // 初始化数据
+    function init() {
+        photos = buildPhotoList();
+        renderGallery();
+        // 绑定礼物盒打开事件
+        const giftDiv = document.getElementById('giftOverlay');
+        giftDiv.addEventListener('click', openGiftAndStart);
+    }
+    
+    init();
 </script>
 </body>
 </html>
